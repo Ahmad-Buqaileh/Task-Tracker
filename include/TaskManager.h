@@ -14,11 +14,12 @@ public:
     TaskManager();
     ~TaskManager();
 
-    void addTask(const std::string &taskname, bool isDone);
-    void deleteTask(int taskId);
-    void markAsDone(int taskId);
-    void updateTask(int taskId, const std::string &newTaskName);
+    void addTask(const std::string &taskname, const std::string &dueDate);
+    void deleteTask(int taskIdToFind);
+    void markAsDone(int taskIdToFind);
+    void updateTask(int taskIdToFind, std::string &newTaskName);
     void resize();
+    int generateId();
 
     void displayTasks() const;
     void displayFinishedTasks() const;

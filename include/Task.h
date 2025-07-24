@@ -13,7 +13,7 @@ private:
     bool isDone;
 
 public:
-    Task(int taskId, std::string taskName, std::string dueDate, std::string updatedDate, bool isDone);
+    Task(int taskId, const std::string taskName, const std::string dueDate, const std::string updatedDate, bool isDone);
 
     // setters
     void setTaskId(int taskId)
@@ -67,4 +67,4 @@ public:
     }
 };
 
-#endif //TASK_H
+#endif // TASK_H
