@@ -1,6 +1,8 @@
 #ifndef TASK_MANAGER_H
 #define TASK_MANAGER_H
 
+#include <fstream>
+
 #include "Task.h"
 
 class TaskManager
