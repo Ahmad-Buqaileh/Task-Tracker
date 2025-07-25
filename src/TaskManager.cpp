@@ -4,6 +4,7 @@
 #include "TaskManager.h"
 #include "Task.h"
 #include "Time.h"
+#include "Json.h"
 
 std::ostream &operator<<(std::ostream &COUT, Task &task)
 {
@@ -149,4 +150,52 @@ void TaskManager::displayFinishedTasks() const
     }
 }
 
-// will impl. save and load later ;p
+void TaskManager::saveToFile(const std::string &filename)
+{
+    json j;
+
+    for (int i = 0; i < size; i++)
+    {
+        j.emplace_back(JsonUtils::toJson(*tasks[i]));
+    }
+
+    std::ofstream file(filename);
+    file << j.dump(4);
+}
+
+void TaskManager::loadFromFile(const std::string &filename)
+{
+    json j;
+    std::ifstream file(filename);
+    if (!file)
+    {
+        std::cerr << "Error while opening file\n";
+        return;
+    }
+    file >> j;
+    file.close();
+    for (int i = 0; i < size; ++i)
+    {
+        if (tasks[i] != nullptr)
+        {
+            delete tasks[i];
+            tasks[i] = nullptr;
+        }
+    }
+    
+    delete[] tasks;
+    size = std::max(static_cast<int>(j.size()), 5);
+    taskCount = j.size();
+    tasks = new Task *[size];
+
+    for (int i = 0; i < size; ++i)
+    {
+        tasks[i] = nullptr;
+    }
+
+    for (int i = 0; i < j.size(); ++i)
+    {
+        Task t = JsonUtils::fromJson(j[i]);
+        tasks[i] = new Task(t);
+    }
+}
