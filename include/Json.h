@@ -9,7 +9,7 @@ using json = nlohmann::json;
 namespace JsonUtils
 {
     // Convert to JSON
-    json toJson();
+    json toJson(const Task &task);
     
     // Convert to Task
     Task fromJson(const json &j);
