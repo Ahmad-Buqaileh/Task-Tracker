@@ -6,6 +6,11 @@
 #include "Time.h"
 #include "Json.h"
 
+Task::Task(int taskId, std::string taskName, std::string dueDate, std::string updatedDate, bool isDone)
+    : taskId(taskId), taskName(taskName), dueDate(dueDate), updatedDate(updatedDate), isDone(isDone) {}
+
+static int lastId = 0;
+
 std::ostream &operator<<(std::ostream &COUT, Task &task)
 {
     COUT << "Task ID : " << task.getTaskId() << std::endl;
@@ -27,6 +32,8 @@ TaskManager::TaskManager()
     {
         tasks[i] = nullptr;
     }
+
+    loadFromFile("Tasks.json");
 }
 
 TaskManager::~TaskManager()
@@ -48,7 +55,6 @@ TaskManager::~TaskManager()
 
 int TaskManager::generateId()
 {
-    static int lastId = 0;
     return ++lastId;
 }
 
@@ -78,6 +84,7 @@ void TaskManager::addTask(const std::string &taskname, const std::string &dueDat
     {
         tasks[taskCount] = new Task(generateId(), taskname, dueDate, "", false);
         taskCount++;
+        saveToFile("Tasks.json");
     }
     else
     {
@@ -90,7 +97,7 @@ void TaskManager::deleteTask(int taskIdToFind)
 {
     for (int i = 0; i < size; i++)
     {
-        if (tasks[i]->getTaskId() == taskIdToFind)
+        if (tasks[i] != nullptr && tasks[i]->getTaskId() == taskIdToFind)
         {
             delete tasks[i];
             for (int j = i; j < taskCount - 1; j++)
@@ -99,6 +106,7 @@ void TaskManager::deleteTask(int taskIdToFind)
             }
             tasks[taskCount - 1] = nullptr;
             taskCount--;
+            saveToFile("Tasks.json");
             return;
         }
     }
@@ -108,23 +116,25 @@ void TaskManager::markAsDone(int taskIdToFind)
 {
     for (int i = 0; i < size; i++)
     {
-        if (tasks[i]->getTaskId() == taskIdToFind)
+        if (tasks[i] != nullptr && tasks[i]->getTaskId() == taskIdToFind)
         {
             tasks[i]->setIsDone(true);
         }
     }
+    saveToFile("Tasks.json");
 }
 
 void TaskManager::updateTask(int taskIdToFind, std::string &newTaskName)
 {
     for (int i = 0; i < size; i++)
     {
-        if (tasks[i]->getTaskId() == taskIdToFind)
+        if (tasks[i] != nullptr && tasks[i]->getTaskId() == taskIdToFind)
         {
             tasks[i]->setTaskName(newTaskName);
             tasks[i]->setUpdatedDate(TimeUtil::getCurrentDateTime());
         }
     }
+    saveToFile("Tasks.json");
 }
 
 void TaskManager::displayTasks() const
@@ -138,7 +148,6 @@ void TaskManager::displayTasks() const
 
 void TaskManager::displayFinishedTasks() const
 {
-
     for (int i = 0; i < size; i++)
     {
         if (tasks[i] != nullptr)
@@ -154,13 +163,19 @@ void TaskManager::saveToFile(const std::string &filename)
 {
     json j;
 
-    for (int i = 0; i < size; i++)
+    for (int i = 0; i < taskCount; i++)
     {
         j.emplace_back(JsonUtils::toJson(*tasks[i]));
     }
 
     std::ofstream file(filename);
+    if (!file)
+    {
+        std::cerr << "Error while saving to file\n";
+        return;
+    }
     file << j.dump(4);
+    file.close();
 }
 
 void TaskManager::loadFromFile(const std::string &filename)
@@ -172,8 +187,10 @@ void TaskManager::loadFromFile(const std::string &filename)
         std::cerr << "Error while opening file\n";
         return;
     }
+
     file >> j;
     file.close();
+
     for (int i = 0; i < size; ++i)
     {
         if (tasks[i] != nullptr)
@@ -182,20 +199,21 @@ void TaskManager::loadFromFile(const std::string &filename)
             tasks[i] = nullptr;
         }
     }
-    
+
     delete[] tasks;
     size = std::max(static_cast<int>(j.size()), 5);
-    taskCount = j.size();
+    taskCount = 0;
     tasks = new Task *[size];
 
-    for (int i = 0; i < size; ++i)
+    for (int i = 0; i < size; i++)
     {
         tasks[i] = nullptr;
     }
 
-    for (int i = 0; i < j.size(); ++i)
+    for (int i = 0; i < j.size(); i++)
     {
-        Task t = JsonUtils::fromJson(j[i]);
-        tasks[i] = new Task(t);
+        tasks[i] = new Task(JsonUtils::fromJson(j[i]));
+        taskCount++;
+        lastId = std::max(lastId, tasks[i]->getTaskId());
     }
 }
