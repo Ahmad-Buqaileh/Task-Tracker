@@ -9,11 +9,22 @@ int main(int argc, char *argv[])
     if (argc < 2)
     {
         std::cerr << "Usage : ./main [command] [arguments]\n";
+        return 1;
     }
 
     std::string command = argv[1];
 
-    if (command == "list")
+    if (command == "help")
+    {
+        std::cout << "list -> to show all tasks; Usage: ./main list\n";
+        std::cout << "list_finished -> to show only finished tasks; Usage: ./main list_finished\n";
+        std::cout << "add -> to add a task; Usage: ./main add [taskName] [dueDate]\n";
+        std::cout << "done -> to mark a task as done; Usage: ./main done [taskId]\n";
+        std::cout << "delete -> to remove a task; Usage: ./main delete [taskId]\n";
+        std::cout << "update -> to update a task; Usage: ./main update [taskId] [taskName]\n";
+    }
+
+    else if (command == "list")
     {
         manager.displayTasks();
     }
