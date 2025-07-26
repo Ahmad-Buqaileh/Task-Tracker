@@ -85,6 +85,7 @@ void TaskManager::addTask(const std::string &taskname, const std::string &dueDat
         tasks[taskCount] = new Task(generateId(), taskname, dueDate, "", false);
         taskCount++;
         saveToFile("Tasks.json");
+        std::cout << "Task added\n";
     }
     else
     {
@@ -95,6 +96,12 @@ void TaskManager::addTask(const std::string &taskname, const std::string &dueDat
 
 void TaskManager::deleteTask(int taskIdToFind)
 {
+    if (!taskCount)
+    {
+        std::cerr << "There are no Tasks to delete; try adding tasks\n";
+        return;
+    }
+
     for (int i = 0; i < size; i++)
     {
         if (tasks[i] != nullptr && tasks[i]->getTaskId() == taskIdToFind)
@@ -107,38 +114,66 @@ void TaskManager::deleteTask(int taskIdToFind)
             tasks[taskCount - 1] = nullptr;
             taskCount--;
             saveToFile("Tasks.json");
+            std::cout << "Task deleted\n";
+
             return;
         }
     }
+    std::cerr << "Task with ID : " << taskIdToFind << "; Not found!\n";
 }
 
 void TaskManager::markAsDone(int taskIdToFind)
 {
+    if (!taskCount)
+    {
+        std::cerr << "There are no Tasks to mark as done; try adding tasks\n";
+        return;
+    }
+
     for (int i = 0; i < size; i++)
     {
         if (tasks[i] != nullptr && tasks[i]->getTaskId() == taskIdToFind)
         {
             tasks[i]->setIsDone(true);
+            saveToFile("Tasks.json");
+            std::cout << "Task marked as done\n";
+            return;
         }
     }
-    saveToFile("Tasks.json");
+    std::cerr << "Task with ID : " << taskIdToFind << "; Not found!\n";
 }
 
 void TaskManager::updateTask(int taskIdToFind, std::string &newTaskName)
 {
+    if (!taskCount)
+    {
+        std::cerr << "There are no Tasks to update; try adding tasks\n";
+        return;
+    }
+
     for (int i = 0; i < size; i++)
     {
         if (tasks[i] != nullptr && tasks[i]->getTaskId() == taskIdToFind)
         {
             tasks[i]->setTaskName(newTaskName);
             tasks[i]->setUpdatedDate(TimeUtil::getCurrentDateTime());
+            saveToFile("Tasks.json");
+            std::cout << "Task updated\n\n";
+
+            return;
         }
     }
-    saveToFile("Tasks.json");
+    std::cerr << "Task with ID : " << taskIdToFind << "; Not found!\n";
 }
 
 void TaskManager::displayTasks() const
 {
+    if (!taskCount)
+    {
+        std::cerr << "There are no Tasks to show; try adding tasks\n";
+        return;
+    }
+
     for (int i = 0; i < size; i++)
     {
         if (tasks[i] != nullptr)
@@ -148,6 +183,15 @@ void TaskManager::displayTasks() const
 
 void TaskManager::displayFinishedTasks() const
 {
+
+    if (!taskCount)
+    {
+        std::cerr << "There are no Tasks to show; try adding tasks\n";
+        return;
+    }
+
+    int isDoneCount = 0;
+
     for (int i = 0; i < size; i++)
     {
         if (tasks[i] != nullptr)
@@ -155,7 +199,12 @@ void TaskManager::displayFinishedTasks() const
             if (tasks[i]->getIsDone())
             {
                 std::cout << *tasks[i] << std::endl;
+                isDoneCount++;
             }
+    }
+    if (!isDoneCount)
+    {
+        std::cout << "There are no finished tasks\n";
     }
 }
 
